@@ -1,0 +1,11 @@
+{
+    "display_name": "Vertex Models+ (모델 추가)",
+    "loading_order": 70,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "nanacorn",
+    "version": "1.0.0",
+    "homePage": "https://github.com/nanacorn/st-vertex-models"
+}

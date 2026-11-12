@@ -8,12 +8,25 @@ const ID = 'vertex_models_plus';
 const SELECT = 'model_vertexai_select';
 
 // 처음 설치했을 때 미리 들어가 있는 모델
-const STARTER = ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-4-carbon'];
+const STARTER = ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-4-carbon', 'gemini-4-hydrogen'];
+// 1.0.0에 들어 있던 모델 (이미 설치한 사람에게 새 모델만 한 번 더해 주는 데 쓴다)
+const STARTER_V100 = ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-4-carbon'];
 
 function cfg() {
     if (!extension_settings[ID]) extension_settings[ID] = {};
     const s = extension_settings[ID];
-    if (!Array.isArray(s.names)) s.names = [...STARTER];
+    if (!Array.isArray(s.names)) {
+        s.names = [...STARTER];
+        s.seeded = [...STARTER];
+    }
+    // 업데이트로 새로 생긴 기본 모델은 한 번만 넣는다. 지운 모델은 다시 넣지 않는다.
+    if (!Array.isArray(s.seeded)) s.seeded = [...STARTER_V100];
+    const fresh = STARTER.filter(n => !s.seeded.includes(n));
+    if (fresh.length) {
+        s.names = tidy([...s.names, ...fresh]);
+        s.seeded.push(...fresh);
+        saveSettingsDebounced();
+    }
     if (typeof s.chosen !== 'string') s.chosen = '';
     return s;
 }

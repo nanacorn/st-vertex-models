@@ -12,7 +12,7 @@ https://github.com/nanacorn/st-vertex-models
 
 ## 처음 들어 있는 모델
 
-`gemini-3.8-flash`, `gemini-4-argon`, `gemini-4-carbon`
+`gemini-3.8-flash`, `gemini-4-argon`, `gemini-4-carbon`, `gemini-4-hydrogen`
 
 ## 쓰는 법
 

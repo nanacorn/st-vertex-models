@@ -8,7 +8,7 @@ const ID = 'vertex_models_plus';
 const SELECT = 'model_vertexai_select';
 
 // 처음 설치했을 때 미리 들어가 있는 모델
-const STARTER = ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-4-carbon', 'gemini-4-hydrogen'];
+const STARTER = ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-4-carbon', 'gemini-4-hydrogen', 'gemini-4-neon'];
 // 1.0.0에 들어 있던 모델 (이미 설치한 사람에게 새 모델만 한 번 더해 주는 데 쓴다)
 const STARTER_V100 = ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-4-carbon'];
 

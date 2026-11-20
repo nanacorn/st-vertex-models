@@ -1,6 +1,8 @@
 # Vertex Models+ (모델 추가)
 
-SillyTavern 확장. 실리태번 목록에 아직 없는 Google Vertex AI 모델 이름을 직접 넣어 쓸 수 있게 해 줍니다.
+SillyTavern 확장. 실리태번 목록에 아직 없는 제미나이 모델 이름을 직접 넣어 쓸 수 있게 해 줍니다.
+
+**Google AI Studio**와 **Google Vertex AI** 두 목록에 같은 모델이 들어가요(1.1.0부터). 마지막으로 고른 모델은 목록마다 따로 기억해요.
 
 ## 설치
 
@@ -18,4 +20,4 @@ https://github.com/nanacorn/st-vertex-models
 
 API 연결(플러그) → 구글 모델 아래 **모델 직접 넣기** → 모델 이름을 한 줄에 하나씩 적고 **목록에 넣기** → 목록 맨 위 「직접 넣은 모델」에서 선택
 
-SillyTavern 1.19.0에서 확인했습니다.
+SillyTavern 1.19.0~1.19.1에서 확인했습니다.

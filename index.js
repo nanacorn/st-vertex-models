@@ -1,16 +1,24 @@
 // Vertex Models+ (모델 추가)
-// 실리태번 목록에 아직 없는 Google Vertex AI 모델 이름을 직접 넣어 쓰게 해 준다.
+// 실리태번 목록에 아직 없는 제미나이 모델 이름을 직접 넣어 쓰게 해 준다.
+// Google Vertex AI 목록과 Google AI Studio 목록에 같은 모델 묶음을 넣는다.
 
 import { extension_settings } from '../../../extensions.js';
 import { eventSource, event_types, saveSettingsDebounced } from '../../../../script.js';
 
 const ID = 'vertex_models_plus';
-const SELECT = 'model_vertexai_select';
+// 목록마다 "마지막으로 고른 모델"을 따로 기억한다. Vertex는 예전 이름(chosen)을 그대로 쓴다.
+const SELECTS = [
+    { id: 'model_vertexai_select', key: 'chosen' },
+    { id: 'model_google_select', key: 'chosenGoogle' },
+];
 
 // 처음 설치했을 때 미리 들어가 있는 모델
 const STARTER = ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-4-carbon', 'gemini-4-hydrogen', 'gemini-4-neon'];
 // 1.0.0에 들어 있던 모델 (이미 설치한 사람에게 새 모델만 한 번 더해 주는 데 쓴다)
 const STARTER_V100 = ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-4-carbon'];
+
+// 화면에 붙은 목록들. 한쪽에서 모델 이름을 바꾸면 다른 쪽도 다시 채운다.
+const mounted = [];
 
 function cfg() {
     if (!extension_settings[ID]) extension_settings[ID] = {};
@@ -27,7 +35,9 @@ function cfg() {
         s.seeded.push(...fresh);
         saveSettingsDebounced();
     }
-    if (typeof s.chosen !== 'string') s.chosen = '';
+    for (const { key } of SELECTS) {
+        if (typeof s[key] !== 'string') s[key] = '';
+    }
     return s;
 }
 
@@ -35,18 +45,13 @@ function tidy(list) {
     return [...new Set(list.map(x => String(x).trim()).filter(Boolean))];
 }
 
-function setup(select) {
+function setup(select, key) {
     const s = cfg();
 
     // 목록 맨 위에 "직접 넣은 모델" 묶음을 만든다.
     const group = document.createElement('optgroup');
     group.label = '직접 넣은 모델';
     select.prepend(group);
-
-    const fill = () => {
-        group.replaceChildren(...cfg().names.map(n => new Option(n, n)));
-        group.hidden = cfg().names.length === 0;
-    };
 
     // 모델 목록 아래에 접히는 입력 칸을 붙인다.
     const box = $(`
@@ -65,16 +70,27 @@ function setup(select) {
         </div>`);
     $(select).after(box);
 
-    box.find('.vmp-text').val(s.names.join('\n'));
+    // 이름 목록이 바뀌었을 때 이 목록을 다시 채운다. 고르던 모델은 남아 있으면 유지한다.
+    const fill = () => {
+        const c = cfg();
+        const before = select.value;
+        group.replaceChildren(...c.names.map(n => new Option(n, n)));
+        group.hidden = c.names.length === 0;
+        box.find('.vmp-text').val(c.names.join('\n'));
+        if (before && select.value !== before && [...select.options].some(o => o.value === before)) {
+            select.value = before;
+        }
+    };
+    mounted.push(fill);
+
     box.find('.vmp-toggle').on('click', () => box.toggleClass('vmp-open'));
     box.find('.vmp-apply').on('click', () => {
         const before = select.value;
         const c = cfg();
         c.names = tidy(String(box.find('.vmp-text').val()).split('\n'));
-        box.find('.vmp-text').val(c.names.join('\n'));
-        fill();
+        mounted.forEach(f => f());
         if (c.names.includes(before)) select.value = before;
-        c.chosen = c.names.includes(select.value) ? select.value : '';
+        c[key] = c.names.includes(select.value) ? select.value : '';
         saveSettingsDebounced();
         $(select).trigger('change');
         box.find('.vmp-note').text(`${c.names.length}개 넣었어요`);
@@ -84,27 +100,33 @@ function setup(select) {
     $(select).on('change', () => {
         const c = cfg();
         const pick = c.names.includes(select.value) ? select.value : '';
-        if (pick !== c.chosen) {
-            c.chosen = pick;
+        if (pick !== c[key]) {
+            c[key] = pick;
             saveSettingsDebounced();
         }
     });
 
     fill();
-    if (s.chosen && s.names.includes(s.chosen) && select.value !== s.chosen) {
-        select.value = s.chosen;
+    if (s[key] && s.names.includes(s[key]) && select.value !== s[key]) {
+        select.value = s[key];
         $(select).trigger('change');
     }
 }
 
 function start() {
-    const select = document.getElementById(SELECT);
-    if (select instanceof HTMLSelectElement && !select.dataset.vmp) {
-        select.dataset.vmp = '1';
-        setup(select);
-        return true;
+    let all = true;
+    for (const { id, key } of SELECTS) {
+        const select = document.getElementById(id);
+        if (!(select instanceof HTMLSelectElement)) {
+            all = false;
+            continue;
+        }
+        if (!select.dataset.vmp) {
+            select.dataset.vmp = '1';
+            setup(select, key);
+        }
     }
-    return false;
+    return all;
 }
 
 jQuery(() => {
